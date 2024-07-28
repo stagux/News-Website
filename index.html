@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" class="light-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Section</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        :root {
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --article-background: white;
+            --article-border-color: #e0e0e0;
+            --button-background: #f4f4f4;
+            --button-text-color: #333;
+            --button-active-background: #333;
+            --button-active-text-color: white;
+            --loading-color: #333;
+        }
+
+        .dark-mode {
+            --background-color: #333;
+            --text-color: #f4f4f4;
+            --article-background: #444;
+            --article-border-color: #555;
+            --button-background: #444;
+            --button-text-color: #f4f4f4;
+            --button-active-background: #f4f4f4;
+            --button-active-text-color: #333;
+            --loading-color: #f4f4f4;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .news-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: var(--article-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .article {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-bottom: 1px solid var(--article-border-color);
+            display: flex;
+            align-items: flex-start;
+            background-color: var(--article-background);
+        }
+
+        .article:last-child {
+            border-bottom: none;
+        }
+
+        .article-image {
+            width: 150px;
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin-right: 15px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .default-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ddd;
+            color: #666;
+            font-size: 24px;
+        }
+
+        .article-content {
+            flex: 1;
+        }
+
+        .article h2 {
+            font-size: 1.2em;
+            margin: 0 0 10px 0;
+            color: var(--text-color);
+        }
+
+        .article p {
+            color: var(--text-color);
+            font-size: 0.9em;
+            margin: 0 0 10px 0;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .search-container input {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 300px;
+            background-color: var(--article-background);
+            color: var(--text-color);
+        }
+
+        .search-container button {
+            margin-left: 10px;
+            padding: 8px 16px;
+            background-color: var(--button-background);
+            color: var(--button-text-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading:before {
+            content: "";
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid var(--loading-color);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: rotate 1s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background-color: var(--button-background);
+            color: var(--button-text-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .read-more-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: var(--button-background);
+            color: var(--button-text-color);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            font-size: 0.8em;
+        }
+
+        .read-more-btn:hover {
+            background-color: var(--button-active-background);
+            color: var(--button-active-text-color);
+        }
+
+        .load-more-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: var(--button-background);
+            color: var(--button-text-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .load-more-btn:hover {
+            background-color: var(--button-active-background);
+            color: var(--button-active-text-color);
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle">
+        <i class="fas fa-sun"></i>
+        <i class="fas fa-moon" style="display: none;"></i>
+    </button>
+
+    <div class="news-container">
+        <h1>Latest News </h1>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search news...">
+            <button id="search-button">Search</button>
+        </div>
+        <div id="news-articles"></div>
+        <div class="loading"></div>
+        <button id="load-more-btn" class="load-more-btn">Load More</button>
+    </div>
+
+    <script>
+        const apiKey = 'a637f1848ae545ada868caee9f716e67';
+        let page = 1;
+        let searchTerm = '';
+        let isLoading = false;
+
+        const defaultImages = [
+            'https://via.placeholder.com/150x100/FF5733/FFFFFF?text=News',
+            'https://via.placeholder.com/150x100/33FF57/FFFFFF?text=Story',
+            'https://via.placeholder.com/150x100/5733FF/FFFFFF?text=Update',
+            'https://via.placeholder.com/150x100/33FFFF/FFFFFF?text=Report'
+        ];
+
+        async function fetchNews() {
+            isLoading = true;
+            const loadingElement = document.querySelector('.loading');
+            loadingElement.style.display = 'block';
+
+            try {
+                const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(searchTerm)}&apiKey=${apiKey}&page=${page}`;
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                renderNews(data.articles, page === 1);
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            } finally {
+                isLoading = false;
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        function renderNews(articles, clearExisting = false) {
+            const newsContainer = document.getElementById('news-articles');
+            if (clearExisting) {
+                newsContainer.innerHTML = '';
+            }
+
+            articles.forEach((article, index) => {
+                const articleDiv = document.createElement('div');
+                articleDiv.classList.add('article');
+
+                const imageDiv = document.createElement('div');
+                imageDiv.classList.add('article-image');
+
+                if (article.urlToImage) {
+                    imageDiv.style.backgroundImage = `url(${article.urlToImage})`;
+                } else {
+                    imageDiv.classList.add('default-image');
+                    imageDiv.style.backgroundImage = `url(${defaultImages[index % defaultImages.length]})`;
+                }
+
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('article-content');
+
+                const title = document.createElement('h2');
+                title.textContent = article.title;
+
+                const description = document.createElement('p');
+                description.textContent = article.description || 'No description available.';
+
+                const readMoreBtn = document.createElement('a');
+                readMoreBtn.href = article.url;
+                readMoreBtn.textContent = 'Read More';
+                readMoreBtn.classList.add('read-more-btn');
+                readMoreBtn.target = '_blank';
+
+                contentDiv.appendChild(title);
+                contentDiv.appendChild(description);
+                contentDiv.appendChild(readMoreBtn);
+
+                articleDiv.appendChild(imageDiv);
+                articleDiv.appendChild(contentDiv);
+                newsContainer.appendChild(articleDiv);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchNews();
+
+            const searchButton = document.getElementById('search-button');
+            searchButton.addEventListener('click', () => {
+                const searchInput = document.getElementById('search-input');
+                searchTerm = searchInput.value;
+                page = 1;
+                fetchNews();
+            });
+
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchTerm = searchInput.value;
+                    page = 1;
+                    fetchNews();
+                }
+            });
+
+            const loadMoreButton = document.getElementById('load-more-btn');
+            loadMoreButton.addEventListener('click', () => {
+                if (!isLoading) {
+                    page++;
+                    fetchNews();
+                }
+            });
+
+            const themeToggleButton = document.querySelector('.theme-toggle');
+            themeToggleButton.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark-mode');
+                themeToggleButton.querySelector('i').classList.toggle('fa-sun');
+                themeToggleButton.querySelector('i').classList.toggle('fa-moon');
+            });
+        });
+    </script>
+</body>
+</html>
+
